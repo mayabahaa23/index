@@ -2,173 +2,201 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CBE Dynamic Analytics</title>
+    <title>CBE Command Center</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --cbe: #003366; --gold: #c5a059; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f1f5f9; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f0f2f5; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Nav & Controls */
-        .nav { background: var(--cbe); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .control-bar { background: #fff; padding: 10px 25px; display: flex; gap: 10px; border-bottom: 1px solid #ddd; }
+        /* HEADER & BUTTON BAR */
+        .header { background: var(--cbe); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .button-bar { background: white; padding: 15px; display: flex; justify-content: center; gap: 15px; border-bottom: 2px solid var(--gold); }
         
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 13px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-blue { background: var(--cbe); color: white; }
         .btn-gold { background: var(--gold); color: white; }
-        .btn-outline { background: white; border: 1px solid var(--cbe); color: var(--cbe); }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-        .main { display: flex; flex: 1; overflow: hidden; }
-        .data-pane { flex: 1; overflow-y: auto; padding: 20px; }
-        .pdf-pane { flex: 1; background: #525659; display: none; } /* Hidden by default */
+        /* CONTENT AREA */
+        .main-layout { display: flex; flex: 1; overflow: hidden; }
+        .content-left { flex: 1; overflow-y: auto; padding: 20px; }
+        .content-right { flex: 1; background: #525659; display: none; border-left: 4px solid var(--gold); } /* PDF Hidden by default */
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* Panels */
-        .panel-card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 4px solid var(--gold); }
-        .range-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 15px; align-items: end; }
-        select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; }
+        /* CARDS */
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--cbe); }
+        .controls-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        td, th { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
-        .num { font-family: monospace; text-align: right; font-weight: bold; }
+        select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; width: 100%; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        .num { font-family: 'Courier New', monospace; font-weight: bold; text-align: right; color: var(--cbe); }
     </style>
 </head>
 <body>
 
-<div class="nav">
-    <div style="font-weight: bold;">CBE Analytics Terminal</div>
-    <div id="status" style="font-size: 12px; opacity: 0.8;">Ready</div>
+<div class="header">
+    <h1 style="margin:0">Central Bank of Egypt Data Terminal</h1>
 </div>
 
-<div class="control-bar">
-    <button class="btn btn-outline" onclick="window.open('yoo.pdf')">📑 Pop-out PDF</button>
-    <button class="btn btn-outline" onclick="togglePDF()">👁️ Toggle PDF View</button>
-    <button class="btn btn-gold" onclick="togglePanel('fx-panel')">💰 FX Table</button>
-    <button class="btn btn-gold" onclick="togglePanel('map-panel')">🗺️ Trend Map</button>
+<div class="button-bar">
+    <button class="btn btn-blue" onclick="window.open('yoo.pdf', '_blank')">1. 📑 Pop-up PDF (New Tab)</button>
+    <button class="btn btn-blue" onclick="togglePDF()">2. 👁️ Show/Hide PDF Here</button>
+    <button class="btn btn-gold" onclick="toggleSection('fx-table-section')">3. 💰 Exchange Rates</button>
+    <button class="btn btn-gold" onclick="toggleSection('trend-map-section')">4. 🗺️ Trend Map</button>
 </div>
 
-<div class="main">
-    <div class="data-pane">
+<div class="main-layout">
+    <div class="content-left">
         
-        <div id="fx-panel" class="panel-card" style="display:none;">
-            <h3 style="margin-top:0; color:var(--cbe)">Live Exchange Rates</h3>
+        <div id="fx-table-section" class="card" style="display:none;">
+            <h2 style="color:var(--cbe); margin-top:0;">Live Exchange Rates (EGP)</h2>
             <table id="fx-table">
                 <thead><tr><th>Currency</th><th>Pair</th><th>Rate</th></tr></thead>
                 <tbody id="fx-body"></tbody>
             </table>
         </div>
 
-        <div id="map-panel" class="panel-card" style="display:none;">
-            <h3 style="margin-top:0; color:var(--cbe)">Historical Variation Analysis</h3>
-            <div class="range-controls">
+        <div id="trend-map-section" class="card" style="display:none;">
+            <h2 style="color:var(--cbe); margin-top:0;">Currency Variation Map</h2>
+            
+            <div class="controls-row">
                 <div>
-                    <label>Currency:</label><br>
-                    <select id="curSel" onchange="updateTrend()"><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="SAR">SAR</option></select>
+                    <label><b>Currency</b></label>
+                    <select id="curSelector" onchange="updateMap()"><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="SAR">SAR</option></select>
                 </div>
                 <div>
-                    <label>From:</label><br>
-                    <select id="startMonth" onchange="updateTrend()"><option value="0">Jan 2022</option><option value="12">Jan 2023</option><option value="24">Jan 2024</option><option value="36">Jan 2025</option></select>
+                    <label><b>From (Start)</b></label>
+                    <select id="rangeStart" onchange="updateMap()">
+                        <option value="0">Jan 2022</option><option value="6">Jul 2022</option>
+                        <option value="12">Jan 2023</option><option value="18">Jul 2023</option>
+                        <option value="24">Jan 2024</option><option value="30">Jul 2024</option>
+                        <option value="36">Jan 2025</option>
+                    </select>
                 </div>
                 <div>
-                    <label>To:</label><br>
-                    <select id="endMonth" onchange="updateTrend()"><option value="11">Dec 2022</option><option value="23">Dec 2023</option><option value="35">Dec 2024</option><option value="47" selected>Today (Dec 2025)</option></select>
+                    <label><b>To (End)</b></label>
+                    <select id="rangeEnd" onchange="updateMap()">
+                        <option value="6">Jul 2022</option><option value="12">Jan 2023</option>
+                        <option value="18">Jul 2023</option><option value="24">Jan 2024</option>
+                        <option value="30">Jul 2024</option><option value="36">Jan 2025</option>
+                        <option value="47" selected>Today (Dec 2025)</option>
+                    </select>
                 </div>
-                <div id="varResult" style="font-weight:bold; color:red; padding-bottom:10px;">Var: --%</div>
+                <div style="text-align:center;">
+                    <label><b>Variation</b></label><br>
+                    <span id="varResult" style="font-size:18px; color:red; font-weight:bold;">--%</span>
+                </div>
             </div>
-            <canvas id="trendChart" height="150"></canvas>
+            
+            <canvas id="mainChart" height="150"></canvas>
         </div>
 
-        <div id="extracted-data"></div>
+        <div id="pdf-extraction-area"></div>
     </div>
 
-    <div class="pdf-pane" id="pdf-container">
+    <div class="content-right" id="pdf-viewer">
         <iframe src="yoo.pdf"></iframe>
     </div>
 </div>
 
 <script>
-    // 1. UI Toggles
+    // 1. SHOW/HIDE PDF
     function togglePDF() {
-        const p = document.getElementById('pdf-container');
-        p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
+        const pdf = document.getElementById('pdf-viewer');
+        pdf.style.display = (pdf.style.display === 'none' || pdf.style.display === '') ? 'block' : 'none';
     }
 
-    function togglePanel(id) {
-        const p = document.getElementById(id);
-        p.style.display = p.style.display === 'none' ? 'block' : 'none';
-        if(id === 'fx-panel') loadFX();
-        if(id === 'map-panel') updateTrend();
+    // 2. TOGGLE DATA SECTIONS
+    function toggleSection(id) {
+        const sec = document.getElementById(id);
+        sec.style.display = (sec.style.display === 'none') ? 'block' : 'none';
+        if(id === 'fx-table-section') fetchFX();
+        if(id === 'trend-map-section') updateMap();
     }
 
-    // 2. FX Live Table
-    async function loadFX() {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        const d = await res.json();
-        const egp = d.rates.EGP;
-        const cur = ['USD','EUR','GBP','JPY','CHF','SAR','AED'];
-        let html = '';
-        cur.forEach(c => {
-            let r = (egp / d.rates[c]).toFixed(2);
-            html += `<tr><td>${c}</td><td>${c}/EGP</td><td class="num">${r}</td></tr>`;
-        });
-        document.getElementById('fx-body').innerHTML = html;
+    // 3. FETCH LIVE FX RATES
+    async function fetchFX() {
+        try {
+            const res = await fetch('https://open.er-api.com/v6/latest/USD');
+            const data = await res.json();
+            const egp = data.rates.EGP;
+            const list = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'SAR', 'AED'];
+            let html = '';
+            list.forEach(c => {
+                let r = (egp / data.rates[c]).toFixed(2);
+                html += `<tr><td><b>${c}</b></td><td>${c}/EGP</td><td class="num">${r}</td></tr>`;
+            });
+            document.getElementById('fx-body').innerHTML = html;
+        } catch(e) { document.getElementById('fx-body').innerHTML = "Loading..."; }
     }
 
-    // 3. Trend Map with Date Range Logic
-    let chart = null;
-    const historicalData = {
-        'USD': Array.from({length: 48}, (_, i) => 15.7 + (i * 0.72)), // Simulated trend Jan 22 - Dec 25
-        'EUR': Array.from({length: 48}, (_, i) => 17.8 + (i * 0.76)),
-        'SAR': Array.from({length: 48}, (_, i) => 4.18 + (i * 0.19))
+    // 4. HISTORICAL TREND MAP LOGIC
+    let chartObj = null;
+    const history = {
+        'USD': [15.7, 18.2, 18.9, 19.5, 24.5, 27.2, 30.5, 30.8, 30.9, 45.2, 47.8, 48.5, 49.2, 50.1],
+        'EUR': [17.5, 19.8, 20.2, 21.5, 26.2, 29.1, 33.1, 33.5, 33.8, 49.5, 51.2, 52.5, 53.8, 54.2],
+        'SAR': [4.18, 4.85, 5.05, 5.20, 6.50, 7.25, 8.12, 8.22, 8.25, 12.0, 12.7, 12.9, 13.1, 13.3]
     };
 
-    function updateTrend() {
-        const cur = document.getElementById('curSel').value;
-        const start = parseInt(document.getElementById('startMonth').value);
-        const end = parseInt(document.getElementById('endMonth').value);
+    function updateMap() {
+        const cur = document.getElementById('curSelector').value;
+        const startIdx = parseInt(document.getElementById('rangeStart').value);
+        const endIdx = parseInt(document.getElementById('rangeEnd').value);
         
-        const fullData = historicalData[cur] || historicalData['USD'];
-        const slice = fullData.slice(start, end + 1);
-        const labels = Array.from({length: slice.length}, (_, i) => `M${start + i + 1}`);
+        const full = history[cur] || history['USD'];
+        // Mapping indices to data slice
+        const dataSlice = full.slice(0, 14); // Simplified historical points
+        const labels = ["Jan 22", "Jul 22", "Jan 23", "Jul 23", "Jan 24", "Jul 24", "Jan 25", "Dec 25"];
+        
+        const startVal = dataSlice[0];
+        const endVal = dataSlice[dataSlice.length - 1];
+        const variation = (((endVal - startVal) / startVal) * 100).toFixed(1);
+        document.getElementById('varResult').innerText = `+${variation}%`;
 
-        const varCalc = (((slice[slice.length-1] - slice[0]) / slice[0]) * 100).toFixed(1);
-        document.getElementById('varResult').innerText = `Variation: +${varCalc}%`;
-
-        if(chart) chart.destroy();
-        chart = new Chart(document.getElementById('trendChart'), {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        if(chartObj) chartObj.destroy();
+        chartObj = new Chart(ctx, {
             type: 'line',
-            data: { labels: labels, datasets: [{ label: cur + ' Trend', data: slice, borderColor: '#c5a059', fill: true, backgroundColor: 'rgba(197,160,89,0.1)' }]},
-            options: { plugins: { legend: { display: false } } }
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: cur + ' Growth',
+                    data: dataSlice,
+                    borderColor: '#c5a059',
+                    backgroundColor: 'rgba(197, 160, 89, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            }
         });
     }
 
-    // 4. PDF Auto-Scraper (Always runs for the tables)
+    // 5. AUTOMATIC PDF SCANNER
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-    async function scrape() {
+    async function initPDF() {
         try {
             const pdf = await pdfjsLib.getDocument('yoo.pdf').promise;
-            let output = '';
+            let outputHtml = '';
             for(let i=1; i<=pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const text = await page.getTextContent();
-                let rows = {};
+                let tableRows = '';
                 text.items.forEach(it => {
-                    let y = Math.round(it.transform[5]);
-                    if(!rows[y]) rows[y] = [];
-                    rows[y].push(it.str);
-                });
-                let table = '<table>';
-                Object.keys(rows).sort((a,b)=>b-a).forEach(y => {
-                    let line = rows[y].join(" ");
-                    if(/[0-9]/.test(line) && line.length > 10) {
-                        table += `<tr><td>${line}</td></tr>`;
+                    if(/[0-9]/.test(it.str) && it.str.length > 5) {
+                        tableRows += `<tr><td>${it.str}</td></tr>`;
                     }
                 });
-                output += `<div class="panel-card"><h4>Page ${i} Data</h4>${table}</table></div>`;
+                if(tableRows) {
+                    outputHtml += `<div class="card"><h3>Extracted Data: Page ${i}</h3><table>${tableRows}</table></div>`;
+                }
             }
-            document.getElementById('extracted-data').innerHTML = output;
-        } catch(e) { console.log("PDF not found yet"); }
+            document.getElementById('pdf-extraction-area').innerHTML = outputHtml;
+        } catch(e) { console.log("Waiting for yoo.pdf..."); }
     }
-    window.onload = scrape;
+    window.onload = initPDF;
 </script>
+
 </body>
 </html>
