@@ -5,6 +5,8 @@
     <title>CBE Precision Terminal</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
     <style>
         :root { --cbe: #003366; --gold: #c5a059; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f9; height: 100vh; display: flex; flex-direction: column; }
@@ -87,16 +89,14 @@
     const years = [2022, 2023, 2024, 2025];
     const fullTimeline = [];
     
-    // Create list of all 48 months
     years.forEach(y => months.forEach(m => fullTimeline.push(`${m} ${y}`)));
 
-    // Generate accurate-ish monthly trend data (48 points) for EGP journey
     function genData(start, end, vol) {
         let arr = []; let cur = start;
         for(let i=0; i<48; i++) {
-            if(i === 3) cur = 18.5; // Mar 22 Float
-            if(i === 12) cur = 24.5; // Jan 23 Float
-            if(i === 26) cur = 47.0; // Mar 24 Float
+            if(i === 3) cur = 18.5;
+            if(i === 12) cur = 24.5;
+            if(i === 26) cur = 47.0;
             cur += (Math.random() * vol);
             arr.push(parseFloat(cur.toFixed(2)));
         }
@@ -141,8 +141,10 @@
 
         const ctx = document.getElementById('chartCanvas').getContext('2d');
         if(myChart) myChart.destroy();
+        
         myChart = new Chart(ctx, {
             type: 'line',
+            plugins: [ChartDataLabels], // Register the labels plugin
             data: {
                 labels: labels,
                 datasets: [{
@@ -151,10 +153,29 @@
                     borderColor: '#c5a059',
                     backgroundColor: 'rgba(197, 160, 89, 0.1)',
                     fill: true,
-                    tension: 0.2
+                    tension: 0.2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }]
             },
-            options: { responsive: true, scales: { x: { ticks: { autoSkip: true, maxTicksLimit: 12 } } } }
+            options: { 
+                responsive: true, 
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        align: 'top',
+                        anchor: 'end',
+                        offset: 4,
+                        font: { weight: 'bold', size: 10 },
+                        color: '#003366', // CBE Blue
+                        formatter: function(value) { return value; }
+                    }
+                },
+                scales: { 
+                    x: { ticks: { autoSkip: true, maxTicksLimit: 12 } },
+                    y: { grace: '10%' } // Gives space at the top so labels aren't cut off
+                } 
+            }
         });
     }
 
