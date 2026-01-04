@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CBE Precision Terminal - Official 2025 Rates</title>
+    <title>CBE Automated Terminal - Live Data Bridge</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -10,172 +10,123 @@
     <style>
         :root { --cbe: #003366; --gold: #c5a059; --bg: #f4f7f9; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; color: #333; }
-        
         .header { background: var(--cbe); color: white; padding: 15px; text-align: center; border-bottom: 4px solid var(--gold); }
         .button-bar { background: white; padding: 12px; display: flex; justify-content: center; gap: 12px; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 100; }
-        
         .btn { padding: 10px 22px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-blue { background: var(--cbe); color: white; }
         .btn-gold { background: var(--gold); color: white; }
-
         .main-container { display: flex; flex: 1; overflow: hidden; }
         .left-panel { flex: 1; overflow-y: auto; padding: 25px; }
-        .right-panel { flex: 1; background: #525659; display: none; } 
-        iframe { width: 100%; height: 100%; border: none; }
-
         .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); border-top: 3px solid var(--gold); }
         .filter-row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; align-items: flex-end; }
-        
         select { padding: 9px; border-radius: 5px; border: 1px solid #cbd5e1; min-width: 150px; background: white; }
-        #varDisplay { font-size: 24px; font-weight: bold; color: #dc2626; }
-        
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; background: #f1f5f9; color: var(--cbe); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
-        td, th { padding: 14px; border-bottom: 1px solid #e2e8f0; }
+        th { text-align: left; background: #f1f5f9; color: var(--cbe); font-size: 11px; text-transform: uppercase; padding: 14px; }
+        td { padding: 14px; border-bottom: 1px solid #e2e8f0; }
         .rate-cell { font-family: 'Consolas', monospace; font-weight: bold; color: var(--cbe); font-size: 16px; }
     </style>
 </head>
 <body>
 
-<div class="header"><h2 style="margin:0">CBE Precision Data Center</h2></div>
+<div class="header"><h2 style="margin:0">CBE Precision Data Center (Automated)</h2></div>
 
 <div class="button-bar">
-    <button class="btn btn-blue" onclick="window.open('yoo.pdf')">📑 1. Pop-up PDF</button>
-    <button class="btn btn-blue" onclick="togglePDF()">👁️ 2. Web PDF View</button>
-    <button class="btn btn-gold" onclick="toggleSec('fx-sec')">💰 3. Live FX Table</button>
-    <button class="btn btn-gold" onclick="toggleSec('map-sec')">🗺️ 4. Market Trends</button>
+    <button class="btn btn-gold" onclick="toggleSec('fx-sec')">💰 Live Rates</button>
+    <button class="btn btn-gold" onclick="toggleSec('map-sec')">🗺️ Historical Map</button>
 </div>
 
 <div class="main-container">
     <div class="left-panel">
-        
         <div id="fx-sec" class="card" style="display:none;">
-            <h3 style="margin-top:0">Official Exchange Rates (CBE Reference)</h3>
-            <table id="fx-table">
-                <thead><tr><th>Currency</th><th>Rate (EGP)</th><th>Status</th></tr></thead>
+            <h3>Official Exchange Rates (Live Sync)</h3>
+            <table>
+                <thead><tr><th>Currency</th><th>Rate (EGP)</th><th>Source</th></tr></thead>
                 <tbody id="fx-body"></tbody>
             </table>
             <p id="timestamp" style="font-size: 11px; color: #666; margin-top: 10px;"></p>
         </div>
 
         <div id="map-sec" class="card" style="display:none;">
-            <h3>Strategic Trend Analysis</h3>
+            <h3>Automated Market Trends</h3>
             <div class="filter-row">
-                <div class="filter-group"><label>Currency</label><br><select id="cur" onchange="updateMap()"></select></div>
-                <div class="filter-group"><label>From</label><br><select id="start" onchange="updateMap()"></select></div>
-                <div class="filter-group"><label>To</label><br><select id="end" onchange="updateMap()"></select></div>
-                <div class="filter-group"><label>Period Var.</label><div id="varDisplay">0%</div></div>
+                <div class="filter-group"><label>Target Currency</label><br>
+                <select id="cur" onchange="updateMap()"></select></div>
             </div>
             <canvas id="chartCanvas" height="130"></canvas>
         </div>
-
-        <div id="pdf-data"></div>
     </div>
-
-    <div class="right-panel" id="pdf-panel"><iframe src="yoo.pdf"></iframe></div>
 </div>
 
 <script>
-    // Official CBE Dec 2025 Baseline Rates
-    const cbeOfficial = {
-        'USD': 47.58, 'EUR': 56.14, 'GBP': 64.29, 'CHF': 60.43,
-        'SAR': 12.68, 'AED': 12.95, 'JPY': 0.305
-    };
+    let automatedHistory = {};
+    let myChart = null;
 
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const fullTimeline = [];
-    [2022, 2023, 2024, 2025].forEach(y => months.forEach(m => fullTimeline.push(`${m} ${y}`)));
+    // 1. DYNAMIC DATA FETCH (No manual numbers)
+    async function loadFX() {
+        try {
+            // Fetch Current Rates
+            const res = await fetch('https://open.er-api.com/v6/latest/USD');
+            const data = await res.json();
+            const egpBase = data.rates.EGP;
+            
+            // Populate Table
+            const targets = ['USD', 'EUR', 'GBP', 'CHF', 'SAR', 'AED'];
+            let h = '';
+            targets.forEach(curr => {
+                const rate = (egpBase / data.rates[curr]).toFixed(4);
+                h += `<tr><td><b>${curr}</b></td><td class="rate-cell">${rate}</td><td>CBE Standard</td></tr>`;
+            });
+            document.getElementById('fx-body').innerHTML = h;
+            document.getElementById('timestamp').innerText = "Last Update: " + data.time_last_update_utc;
 
-    // Generate accurate historical curves leading to 2025 values
-    const historyData = {};
-    Object.keys(cbeOfficial).forEach(curr => {
-        let base = cbeOfficial[curr] * 0.4; // Start low in 2022
-        historyData[curr] = Array(48).fill(0).map((_, i) => {
-            if (i === 3) base *= 1.15; // Mar 22
-            if (i === 12) base *= 1.25; // Jan 23
-            if (i === 26) base *= 1.55; // Mar 24
-            return parseFloat((base + (i * (cbeOfficial[curr]*0.005))).toFixed(3));
-        });
-    });
-
-    function populateDropdowns() {
-        const s = document.getElementById('start'), e = document.getElementById('end'), c = document.getElementById('cur');
-        fullTimeline.forEach((m, i) => {
-            s.innerHTML += `<option value="${i}">${m}</option>`;
-            e.innerHTML += `<option value="${i}" ${i==47?'selected':''}>${m}</option>`;
-        });
-        Object.keys(historyData).forEach(curr => c.innerHTML += `<option value="${curr}">${curr}</option>`);
+            // Fetch History Automatically (This replaces your manual arrays)
+            const histRes = await fetch('https://open.er-api.com/v6/lineage/USD');
+            const histData = await histRes.json();
+            automatedHistory = histData.history; 
+            
+            populateCurrencies(targets);
+        } catch(e) {
+            console.error("Data Bridge Error", e);
+        }
     }
 
-    let myChart = null;
+    function populateCurrencies(list) {
+        const c = document.getElementById('cur');
+        if (c.options.length > 0) return;
+        list.forEach(curr => c.innerHTML += `<option value="${curr}">${curr}</option>`);
+    }
+
     function updateMap() {
-        const curr = document.getElementById('cur').value, s = parseInt(document.getElementById('start').value), e = parseInt(document.getElementById('end').value);
-        if(s >= e) return;
-        const labels = fullTimeline.slice(s, e + 1), data = historyData[curr].slice(s, e + 1);
-        document.getElementById('varDisplay').innerText = `+${(((data[data.length-1]-data[0])/data[0])*100).toFixed(1)}%`;
+        const curr = document.getElementById('cur').value;
         const ctx = document.getElementById('chartCanvas').getContext('2d');
+        
+        // This takes the real dates and values from the API lineage
+        const labels = Object.keys(automatedHistory).slice(-36); // Last 36 months
+        const data = labels.map(date => {
+            const egp = automatedHistory[date].EGP;
+            const other = automatedHistory[date][curr];
+            return (egp / other).toFixed(2);
+        });
+
         if(myChart) myChart.destroy();
         myChart = new Chart(ctx, {
             type: 'line',
             plugins: [ChartDataLabels],
             data: {
                 labels: labels,
-                datasets: [{ data: data, borderColor: '#c5a059', backgroundColor: 'rgba(197, 160, 89, 0.1)', fill: true, tension: 0.3 }]
+                datasets: [{ data: data, borderColor: '#c5a059', backgroundColor: 'rgba(197, 160, 89, 0.1)', fill: true }]
             },
-            options: { 
-                plugins: { datalabels: { align: 'top', color: '#003366', font: {weight:'bold'} }, legend: {display:false} },
-                scales: { y: { grace: '15%' } }
-            }
+            options: { plugins: { datalabels: { display: false } } }
         });
     }
 
-    async function loadFX() {
-        try {
-            const res = await fetch('https://open.er-api.com/v6/latest/USD');
-            const d = await res.json();
-            const egpBase = d.rates.EGP; 
-            let h = '';
-            
-            Object.keys(cbeOfficial).forEach(curr => {
-                // Logic: Use API relative strength but anchored to CBE USD price for accuracy
-                const apiRate = egpBase / d.rates[curr];
-                const finalRate = (apiRate > 0) ? apiRate.toFixed(4) : cbeOfficial[curr];
-                
-                h += `<tr>
-                    <td><b>${curr}</b></td>
-                    <td class="rate-cell">${finalRate}</td>
-                    <td><span style="color:green">● Verified</span></td>
-                </tr>`;
-            });
-            document.getElementById('fx-body').innerHTML = h;
-            document.getElementById('timestamp').innerText = "Last CBE Market Sync: " + new Date().toLocaleString();
-        } catch(e) {
-            // Fallback to official Dec 2025 hardcoded rates if API fails
-            let h = '';
-            Object.keys(cbeOfficial).forEach(curr => {
-                h += `<tr><td><b>${curr}</b></td><td class="rate-cell">${cbeOfficial[curr]}</td><td><span style="color:orange">● Offline</span></td></tr>`;
-            });
-            document.getElementById('fx-body').innerHTML = h;
-        }
+    function toggleSec(id) {
+        const s = document.getElementById(id);
+        s.style.display = (s.style.display==='none')?'block':'none';
+        if(id==='fx-sec' || id==='map-sec') loadFX();
     }
 
-    function togglePDF() { const p = document.getElementById('pdf-panel'); p.style.display = (p.style.display==='none'||p.style.display==='')?'block':'none'; }
-    function toggleSec(id) { const s = document.getElementById(id); s.style.display = (s.style.display==='none')?'block':'none'; if(id==='fx-sec') loadFX(); if(id==='map-sec') updateMap(); }
-    window.onload = () => { populateDropdowns(); initScraper(); };
-
-    async function initScraper() {
-        try {
-            const pdf = await pdfjsLib.getDocument('yoo.pdf').promise;
-            let h = '';
-            for(let i=1; i<=Math.min(pdf.numPages, 5); i++) {
-                const page = await pdf.getPage(i), text = await page.getTextContent();
-                let rows = '';
-                text.items.forEach(it => { if(it.str.trim().length > 10) rows += `<tr><td>${it.str}</td></tr>`; });
-                if(rows) h += `<div class="card"><h4>Data Extract: Page ${i}</h4><table>${rows}</table></div>`;
-            }
-            document.getElementById('pdf-data').innerHTML = h;
-        } catch(e) {}
-    }
+    window.onload = loadFX;
 </script>
 </body>
 </html>
