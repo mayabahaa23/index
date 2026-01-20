@@ -34,7 +34,6 @@
         td, th { padding: 14px; border-bottom: 1px solid #e2e8f0; }
         .rate-cell { font-family: 'Consolas', monospace; font-weight: bold; color: var(--cbe); font-size: 16px; }
 
-        /* Monthly Menu Styling */
         #year-menu { display:none; position:absolute; top:45px; left:0; z-index:1000; min-width:300px; border:1px solid #ddd; padding: 15px; background: white; }
         #month-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-top:10px; }
         .month-btn { padding: 8px; font-size: 11px; background: #f1f5f9; border: 1px solid #ddd; cursor: pointer; border-radius: 4px; font-weight: bold; }
@@ -64,7 +63,7 @@
 <div class="main-container">
     <div class="left-panel">
         <div id="fx-sec" class="card" style="display:none;">
-            <h3>Official Exchange Rates (CBE Reference)</h3>
+            <h3>Official Exchange Rates</h3>
             <table id="fx-table">
                 <thead><tr><th>Currency</th><th>Rate (EGP)</th><th>Status</th></tr></thead>
                 <tbody id="fx-body"></tbody>
@@ -84,7 +83,7 @@
         </div>
         <div id="pdf-data"></div>
     </div>
-    <div class="right-panel" id="pdf-panel"><iframe id="pdf-frame" src="yoo.pdf"></iframe></div>
+    <div class="right-panel" id="pdf-panel"><iframe id="pdf-frame" src=""></iframe></div>
 </div>
 
 <script>
@@ -116,39 +115,52 @@
             btn.className = 'month-btn';
             btn.innerText = m;
             
-            let fileName = `${year}-${m}.pdf`;
+            // FILENAME LOGIC
+            let f = `${year}-${m}.pdf`;
             if (year === '2025') {
-                if (m === 'Dec') fileName = 'yoo.pdf';
-                if (m === 'Nov') fileName = 'novv.pdf';
-                if (m === 'Oct') fileName = 'octt.pdf';
+                if (m === 'Dec') f = 'yoo.pdf';
+                if (m === 'Nov') f = 'novv.pdf';
+                if (m === 'Oct') f = 'octt.pdf';
             }
 
-            btn.onclick = () => { loadSpecificPDF(fileName); toggleYearMenu(); };
+            btn.onclick = () => { loadSpecificPDF(f); toggleYearMenu(); };
             grid.appendChild(btn);
         });
     }
 
-    async function loadSpecificPDF(fileName) {
+    async function loadSpecificPDF(f) {
         const panel = document.getElementById('pdf-panel');
         const frame = document.getElementById('pdf-frame');
-        frame.src = fileName;
+        frame.src = f;
         panel.style.display = 'block';
-        initScraper(fileName);
+        initScraper(f); // Pass the new filename to the text reader
     }
 
-    async function initScraper(fileName = 'yoo.pdf') {
+    async function initScraper(f) {
+        const display = document.getElementById('pdf-data');
+        display.innerHTML = `<div class="card"><h4>🔄 Reading ${f}...</h4></div>`;
+        
         try {
-            const pdf = await pdfjsLib.getDocument(fileName).promise;
-            let h = `<h3>Extract from ${fileName}</h3>`;
+            const loadingTask = pdfjsLib.getDocument(f);
+            const pdf = await loadingTask.promise;
+            let h = `<h3>Extract from ${f}</h3>`;
+            
             for(let i=1; i<=Math.min(pdf.numPages, 3); i++) {
-                const page = await pdf.getPage(i), text = await page.getTextContent();
+                const page = await pdf.getPage(i);
+                const text = await page.getTextContent();
                 let rows = '';
-                text.items.forEach(it => { if(it.str.trim().length > 10) rows += `<tr><td>${it.str}</td></tr>`; });
+                text.items.forEach(it => { 
+                    if(it.str.trim().length > 10) rows += `<tr><td>${it.str}</td></tr>`; 
+                });
                 if(rows) h += `<div class="card"><h4>Page ${i}</h4><table>${rows}</table></div>`;
             }
-            document.getElementById('pdf-data').innerHTML = h;
+            display.innerHTML = h;
         } catch(e) { 
-            document.getElementById('pdf-data').innerHTML = `<p style="color:red">File ${fileName} not found.</p>`; 
+            display.innerHTML = `
+                <div class="card" style="border-top:3px solid red">
+                    <h4 style="color:red">⚠️ File Error</h4>
+                    <p>Could not find <b>${f}</b> in the folder.</p>
+                </div>`; 
         }
     }
 
@@ -203,7 +215,10 @@
         if(id==='map-sec') updateMap(); 
     }
 
-    window.onload = () => { populateDropdowns(); initScraper('yoo.pdf'); };
+    window.onload = () => { 
+        populateDropdowns(); 
+        initScraper('yoo.pdf'); // Startup view
+    };
 </script>
 </body>
 </html>
