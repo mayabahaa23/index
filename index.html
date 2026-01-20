@@ -34,9 +34,11 @@
         td, th { padding: 14px; border-bottom: 1px solid #e2e8f0; }
         .rate-cell { font-family: 'Consolas', monospace; font-weight: bold; color: var(--cbe); font-size: 16px; }
 
-        /* Menu Styling */
-        #year-menu { display:none; position:absolute; top:45px; left:0; z-index:1000; min-width:300px; border:1px solid #ddd; padding: 15px; }
-        #month-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:5px; margin-top:10px; }
+        /* Monthly Menu Styling */
+        #year-menu { display:none; position:absolute; top:45px; left:0; z-index:1000; min-width:300px; border:1px solid #ddd; padding: 15px; background: white; }
+        #month-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-top:10px; }
+        .month-btn { padding: 8px; font-size: 11px; background: #f1f5f9; border: 1px solid #ddd; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        .month-btn:hover { background: var(--gold); color: white; }
     </style>
 </head>
 <body>
@@ -48,7 +50,7 @@
     <div style="display:inline-block; position:relative;">
         <button class="btn btn-blue" onclick="toggleYearMenu()">👁️ 2. Web PDF View</button>
         <div id="year-menu" class="card">
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:10px; justify-content: center;">
                 <button class="btn btn-gold" onclick="showMonths('2024')">2024</button>
                 <button class="btn btn-gold" onclick="showMonths('2025')">2025</button>
             </div>
@@ -82,14 +84,14 @@
         </div>
         <div id="pdf-data"></div>
     </div>
-    <div class="right-panel" id="pdf-panel"><iframe src="yoo.pdf"></iframe></div>
+    <div class="right-panel" id="pdf-panel"><iframe id="pdf-frame" src="yoo.pdf"></iframe></div>
 </div>
 
 <script>
     const cbeOfficial = { 'USD': 47.531, 'EUR': 56.001, 'GBP': 64.276, 'CHF': 60.336, 'SAR': 12.672, 'AED': 12.939, 'JPY': 0.304 };
-    const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const fullTimeline = [];
-    [2022, 2023, 2024, 2025].forEach(y => monthLabels.forEach(m => fullTimeline.push(`${m} ${y}`)));
+    [2022, 2023, 2024, 2025].forEach(y => monthNames.forEach(m => fullTimeline.push(`${m} ${y}`)));
 
     const ratesArchive = {
         USD: [15.7, 15.7, 15.7, 18.3, 18.5, 18.7, 18.9, 19.1, 19.3, 19.6, 24.2, 24.7, 29.8, 30.5, 30.8, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 47.5, 48.2, 47.9, 47.5, 48.1, 48.5, 48.3, 48.1, 49.2, 49.5, 48.8, 48.5, 48.2, 47.9, 47.5, 47.2, 47.4, 47.6, 47.3, 47.2, 47.1, 47.4],
@@ -109,19 +111,27 @@
     function showMonths(year) {
         const grid = document.getElementById('month-grid');
         grid.innerHTML = '';
-        monthLabels.forEach(m => {
+        monthNames.forEach(m => {
             const btn = document.createElement('button');
-            btn.className = 'btn btn-blue';
-            btn.style.padding = '5px'; btn.style.fontSize = '10px';
+            btn.className = 'month-btn';
             btn.innerText = m;
-            btn.onclick = () => { loadSpecificPDF(`${year}-${m}.pdf`); toggleYearMenu(); };
+            
+            let fileName = `${year}-${m}.pdf`;
+            if (year === '2025') {
+                if (m === 'Dec') fileName = 'yoo.pdf';
+                if (m === 'Nov') fileName = 'novv.pdf';
+                if (m === 'Oct') fileName = 'octt.pdf';
+            }
+
+            btn.onclick = () => { loadSpecificPDF(fileName); toggleYearMenu(); };
             grid.appendChild(btn);
         });
     }
 
     async function loadSpecificPDF(fileName) {
         const panel = document.getElementById('pdf-panel');
-        panel.querySelector('iframe').src = fileName;
+        const frame = document.getElementById('pdf-frame');
+        frame.src = fileName;
         panel.style.display = 'block';
         initScraper(fileName);
     }
@@ -137,7 +147,9 @@
                 if(rows) h += `<div class="card"><h4>Page ${i}</h4><table>${rows}</table></div>`;
             }
             document.getElementById('pdf-data').innerHTML = h;
-        } catch(e) { document.getElementById('pdf-data').innerHTML = `<p style="color:red">File ${fileName} not found.</p>`; }
+        } catch(e) { 
+            document.getElementById('pdf-data').innerHTML = `<p style="color:red">File ${fileName} not found.</p>`; 
+        }
     }
 
     function populateDropdowns() {
@@ -191,7 +203,7 @@
         if(id==='map-sec') updateMap(); 
     }
 
-    window.onload = () => { populateDropdowns(); initScraper(); };
+    window.onload = () => { populateDropdowns(); initScraper('yoo.pdf'); };
 </script>
 </body>
 </html>
