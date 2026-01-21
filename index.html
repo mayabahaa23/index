@@ -145,6 +145,10 @@
                 const map = {Dec:'yoo.pdf', Nov:'novv.pdf', Oct:'octt.pdf', Sep:'sepp.pdf', Aug:'augg.pdf', Jul:'julyy.pdf', Jun:'junee.pdf', May:'mayy.pdf', Apr:'aprr.pdf', Mar:'marr.pdf', Feb:'febbb.pdf', Jan:'jann.pdf'};
                 f = map[m] || f;
             }
+             if (year === '2024') {
+                const map = {Dec:'dec 24.pdf', Nov:'nov 24.pdf', Oct:'oct 24.pdf', Sep:'sep 24.pdf', Aug:'aug 24.pdf', Jul:'jul 24.pdf', Jun:'jun 24.pdf', May:'may 24.pdf', Apr:'apr 24.pdf', Mar:'mar 24.pdf', Feb:'feb 24.pdf', Jan:'jan 24.pdf'};
+                f = map[m] || f;
+            }
 
             btn.onclick = () => { 
                 currentFile = f;
@@ -240,3 +244,4 @@
 </script>
 </body>
 </html>
+
