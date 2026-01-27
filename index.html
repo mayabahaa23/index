@@ -236,12 +236,68 @@
         Object.keys(ratesArchive).forEach(curr => c.innerHTML += `<option value="${curr}">${curr}</option>`);
     }
 
-    function updateMap() { /* (Keep your original updateMap logic here if needed for archive data) */ }
-    async function loadFX() { /* (Keep your original loadFX logic here) */ }
+   function updateMap() {
+        const cur = document.getElementById('cur').value;
+        const startIdx = parseInt(document.getElementById('start').value);
+        const endIdx = parseInt(document.getElementById('end').value);
+        
+        const dataSlice = ratesArchive[cur].slice(startIdx, endIdx + 1);
+        const labelSlice = fullTimeline.slice(startIdx, endIdx + 1);
+        
+        // Calculate Percentage Variation
+        const startVal = dataSlice[0];
+        const endVal = dataSlice[dataSlice.length - 1];
+        const varPercent = (((endVal - startVal) / startVal) * 100).toFixed(2);
+        const varDisplay = document.getElementById('varDisplay');
+        
+        varDisplay.innerText = varPercent + "%";
+        varDisplay.style.color = varPercent >= 0 ? "#dc2626" : "#16a34a"; 
+
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labelSlice,
+                datasets: [{
+                    label: `${cur} Trend (EGP)`,
+                    data: dataSlice,
+                    borderColor: '#003366',
+                    backgroundColor: 'rgba(0, 51, 102, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 2
+                }]
+            },
+            options: { 
+                responsive: true,
+                plugins: { legend: { display: true } },
+                scales: { y: { beginAtZero: false } }
+            }
+        });
+    }
+
+    async function loadFX() {
+        const body = document.getElementById('fx-body');
+        const ts = document.getElementById('timestamp');
+        if (!body) return;
+        body.innerHTML = "";
+        
+        Object.entries(cbeOfficial).forEach(([cur, rate]) => {
+            const row = `<tr>
+                <td><b>${cur}</b></td>
+                <td class="rate-cell">${rate.toFixed(3)}</td>
+                <td><span style="color:green">● Official</span></td>
+            </tr>`;
+            body.innerHTML += row;
+        });
+        ts.innerText = "Last Synchronized: " + new Date().toLocaleString();
+    }
     function toggleSec(id) { const s = document.getElementById(id); s.style.display = (s.style.display==='none')?'block':'none'; if(id==='fx-sec') loadFX(); }
 
     window.onload = () => { populateDropdowns(); };
 </script>
 </body>
 </html>
+
 
