@@ -110,9 +110,15 @@
     // Data Sources
     const cbeOfficial = { 'USD': 47.531, 'EUR': 56.001, 'GBP': 64.276, 'CHF': 60.336, 'SAR': 12.672, 'AED': 12.939, 'JPY': 0.304 };
     const ratesArchive = {
-        USD: [15.7, 15.7, 15.7, 18.3, 18.5, 18.7, 18.9, 19.1, 19.3, 19.6, 24.2, 24.7, 29.8, 30.5, 30.8, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 47.5, 48.2, 47.9, 47.5, 48.1, 48.5, 48.3, 48.1, 49.2, 49.5, 48.8, 48.5, 48.2, 47.9, 47.5, 47.2, 47.4, 47.6, 47.3, 47.2, 47.1, 47.4],
-        EUR: [17.8, 17.7, 17.5, 19.8, 19.6, 19.7, 19.2, 19.1, 19.0, 19.3, 24.5, 26.1, 31.5, 32.4, 33.1, 33.7, 33.5, 33.8, 34.2, 33.9, 33.2, 33.6, 33.8, 34.1, 33.9, 33.5, 51.5, 52.3, 51.8, 51.2, 52.1, 52.8, 53.4, 53.1, 52.5, 52.2, 52.8, 52.4, 53.1, 53.9, 54.2, 54.5, 54.7, 54.9, 55.1, 55.0, 54.8, 55.0],
-        // ... (Keep other currencies from your original list)
+      const ratesArchive = {
+    USD: [15.7, 15.7, 15.7, 18.3, 18.5, 18.7, 18.9, 19.1, 19.3, 19.6, 24.2, 24.7, 29.8, 30.5, 30.8, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 30.9, 47.5, 48.2, 47.9, 47.5, 48.1, 48.5, 48.3, 48.1, 49.2, 49.5, 48.8, 48.5, 48.2, 47.9, 47.5, 47.2, 47.4, 47.6, 47.3, 47.2, 47.1, 47.4, 47.08],
+    EUR: [17.8, 17.7, 17.5, 19.8, 19.6, 19.7, 19.2, 19.1, 19.0, 19.3, 24.5, 26.1, 31.5, 32.4, 33.1, 33.7, 33.5, 33.8, 34.2, 33.9, 33.2, 33.6, 33.8, 34.1, 33.9, 33.5, 51.5, 52.3, 51.8, 51.2, 52.1, 52.8, 53.4, 53.1, 52.5, 52.2, 52.8, 52.4, 53.1, 53.9, 54.2, 54.5, 54.7, 54.9, 55.1, 55.0, 54.8, 55.0, 55.83],
+    GBP: [21.3, 21.1, 20.8, 23.9, 23.1, 23.0, 22.8, 22.5, 22.1, 22.4, 28.2, 30.1, 35.9, 36.8, 37.5, 38.4, 38.6, 39.2, 39.8, 39.4, 38.9, 38.1, 38.5, 39.1, 39.3, 39.1, 60.1, 61.2, 60.5, 60.1, 61.5, 62.1, 62.8, 63.5, 63.8, 63.2, 63.4, 63.1, 63.3, 63.5, 63.1, 62.9, 63.2, 63.5, 63.3, 63.1, 63.1, 63.4, 64.34],
+    SAR: [4.18, 4.18, 4.18, 4.88, 4.93, 4.98, 5.03, 5.09, 5.14, 5.22, 6.44, 6.57, 7.93, 8.12, 8.20, 8.23, 8.23, 8.23, 8.23, 8.23, 8.23, 8.23, 8.23, 8.23, 8.23, 8.23, 12.6, 12.8, 12.7, 12.6, 12.8, 12.9, 12.8, 12.8, 13.1, 13.2, 13.0, 12.9, 12.8, 12.7, 12.6, 12.5, 12.6, 12.6, 12.6, 12.6, 12.5, 12.6, 12.53],
+    AED: [4.27, 4.27, 4.27, 4.98, 5.03, 5.09, 5.14, 5.20, 5.25, 5.33, 6.58, 6.72, 8.11, 8.30, 8.38, 8.41, 8.41, 8.41, 8.41, 8.41, 8.41, 8.41, 8.41, 8.41, 8.41, 8.41, 12.9, 13.1, 13.0, 12.9, 13.1, 13.2, 13.1, 13.1, 13.4, 13.5, 13.2, 13.2, 13.1, 13.0, 12.9, 12.8, 12.9, 12.9, 12.8, 12.8, 12.8, 12.9, 12.82],
+    CHF: [17.1, 17.0, 16.9, 19.5, 19.1, 19.4, 19.5, 19.8, 20.1, 20.5, 25.4, 26.6, 32.1, 32.8, 33.4, 34.2, 34.5, 34.8, 35.5, 35.1, 34.8, 34.9, 35.2, 36.1, 36.3, 35.8, 53.5, 54.2, 53.6, 53.1, 54.5, 55.2, 56.1, 56.5, 56.1, 55.8, 56.4, 56.8, 57.2, 57.8, 58.1, 58.4, 58.8, 59.1, 58.9, 58.8, 58.8, 58.9, 60.51],
+    JPY: [13.6, 13.5, 12.9, 14.5, 14.3, 13.9, 13.8, 13.9, 13.5, 13.3, 17.2, 18.2, 22.5, 23.1, 23.4, 23.1, 22.2, 21.8, 21.5, 21.2, 20.9, 20.5, 20.8, 21.4, 21.2, 20.8, 31.5, 32.1, 31.2, 30.5, 31.1, 31.8, 33.5, 32.8, 31.9, 32.2, 31.8, 31.5, 31.1, 30.8, 30.5, 30.1, 30.2, 30.4, 29.9, 29.8, 29.9, 30.0, 30.42]
+};
     };
 
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -135,52 +141,45 @@
     }
 
     // --- 2. FIXED: Market Trends Map Logic ---
-    function updateMap() {
-        const cur = document.getElementById('cur').value;
-        const startIndex = parseInt(document.getElementById('start').value);
-        const endIndex = parseInt(document.getElementById('end').value);
-
-        if (startIndex >= endIndex) {
-            document.getElementById('varDisplay').innerText = "Range Error";
-            return;
-        }
-
-        const dataSlice = ratesArchive[cur].slice(startIndex, endIndex + 1);
-        const labelSlice = fullTimeline.slice(startIndex, endIndex + 1);
-
-        // Calculate Variation %
-        const first = dataSlice[0];
-        const last = dataSlice[dataSlice.length - 1];
-        const variation = (((last - first) / first) * 100).toFixed(2);
-        
-        const varEl = document.getElementById('varDisplay');
-        varEl.innerText = (variation > 0 ? "+" : "") + variation + "%";
-        varEl.style.color = variation > 0 ? "#dc2626" : "#16a34a"; // Red for up, Green for down
-
-        // Draw Chart
-        const ctx = document.getElementById('chartCanvas').getContext('2d');
-        if (myChart) myChart.destroy();
-        myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labelSlice,
-                datasets: [{
-                    label: `${cur} Trend (Historical)`,
-                    data: dataSlice,
-                    borderColor: '#003366',
-                    backgroundColor: 'rgba(0,51,102,0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: false } }
+myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labelSlice,
+        datasets: [{
+            label: `${cur} Trend`,
+            data: dataSlice,
+            borderColor: '#003366',
+            backgroundColor: 'rgba(0,51,102,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#c5a059'
+        }]
+    },
+    plugins: [ChartDataLabels], // <--- Add this line to activate the plugin
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            datalabels: { // <--- This block adds the numbers to the map
+                align: 'top',
+                anchor: 'end',
+                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                borderRadius: 4,
+                color: '#003366',
+                font: { weight: 'bold', size: 10 },
+                formatter: (value) => value.toFixed(2), // Displays number like 47.50
+                display: true
             }
-        });
+        },
+        scales: {
+            y: { 
+                beginAtZero: false,
+                content: { padding: 20 } // Give space for labels at the top
+            }
+        }
     }
+});
 
     // --- Navigation & Helper Functions ---
     function toggleSec(id) { 
@@ -247,6 +246,7 @@
 </script>
 </body>
 </html>
+
 
 
 
