@@ -135,7 +135,41 @@
         const varDisp = document.getElementById('varDisplay');
         varDisp.innerText = (change > 0 ? "+" : "") + change + "%";
         varDisp.style.color = change > 0 ? "#dc2626" : "#16a34a";
+ function showMonths(year) {
+        const grid = document.getElementById('month-grid');
+        grid.innerHTML = '';
+@@ -129,21 +142,16 @@ <h3>Strategic Trend Analysis</h3>
 
+            let f = `${year}-${m}.pdf`;
+            if (year === '2025') {
+                if (m === 'Dec') f = 'yoo.pdf';
+                if (m === 'Nov') f = 'novv.pdf';
+                if (m === 'Oct') f = 'octt.pdf';
+                if (m === 'Sep') f = 'sepp.pdf';
+                if (m === 'Aug') f = 'augg.pdf';
+                if (m === 'Jul') f = 'julyy.pdf';
+                if (m === 'Jun') f = 'junee.pdf';
+                if (m === 'May') f = 'mayy.pdf';
+                if (m === 'Apr') f = 'aprr.pdf';
+                if (m === 'Mar') f = 'marr.pdf';
+                if (m === 'Feb') f = 'febb.pdf';
+                if (m === 'Jan') f = 'jann.pdf';
+                const map = {Dec:'yoo.pdf', Nov:'novv.pdf', Oct:'octt.pdf', Sep:'sepp.pdf', Aug:'augg.pdf', Jul:'julyy.pdf', Jun:'junee.pdf', May:'mayy.pdf', Apr:'aprr.pdf', Mar:'marr.pdf', Feb:'febbb.pdf', Jan:'jann.pdf'};
+                f = map[m] || f;
+            }
+        if(year=='2024'){
+             if (m === 'Dec') f = 'yoo.pdf';
+                if (m === 'Nov') f = 'nov 24.pdf';
+                if (m === 'Oct') f = 'oct 24.pdf';
+                if (m === 'Sep') f = 'sept 24.pdf';
+                if (m === 'Aug') f = 'aug 24.pdf';
+                if (m === 'Jul') f = 'july 24.pdf';
+                if (m === 'Jun') f = 'june 24.pdf';
+                if (m === 'May') f = 'may 24.pdf';
+                if (m === 'Apr') f = 'apr 24.pdf';
+                if (m === 'Mar') f = 'mar 24.pdf';
+                if (m === 'Feb') f = 'feb 24.pdf';
+                if (m === 'Jan') f = 'jan 24.pdf';
         const ctx = document.getElementById('chartCanvas').getContext('2d');
         if (myChart) myChart.destroy();
         
@@ -222,3 +256,4 @@
 
 </body>
 </html>
+
